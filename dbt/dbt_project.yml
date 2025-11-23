@@ -1,0 +1,65 @@
+# dbt Project Configuration for Lakehouse
+
+name: 'lakehouse'
+version: '1.0.0'
+config-version: 2
+
+# Profile configuration
+profile: 'lakehouse'
+
+# Directories
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+# Output directory for compiled SQL
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# Materializations by layer
+models:
+  lakehouse:
+    # Bronze layer - external tables pointing to raw data
+    bronze:
+      +materialized: external
+      +location: 's3://bronze/'
+      +schema: bronze
+    
+    # Silver layer - incremental for large datasets
+    silver:
+      +materialized: incremental
+      +location: 's3://silver/'
+      +schema: silver
+      +on_schema_change: "append_new_columns"
+    
+    # Gold layer - tables for dimensional models
+    gold:
+      +materialized: table
+      +location: 's3://gold/'
+      +schema: gold
+
+# Testing
+tests:
+  +store_failures: true
+  +schema: test_failures
+
+# Documentation
+docs-paths: ["docs"]
+
+# Seeds
+seeds:
+  lakehouse:
+    +schema: seeds
+
+# Vars (can be overridden via CLI or profiles.yml)
+vars:
+  # Date ranges for incremental models
+  start_date: '2024-01-01'
+  
+  # Environment
+  env: 'dev'

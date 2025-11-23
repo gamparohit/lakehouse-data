@@ -1,0 +1,68 @@
+# Soda Checks for Silver Layer
+# Focus on data quality after cleansing and transformation
+
+checks for silver_customers:
+  # Row count validation
+  - row_count > 0
+  
+  # Uniqueness
+  - duplicate_count(customer_id) = 0:
+      name: Customer IDs must be unique
+  
+  # Completeness
+  - missing_count(customer_id) = 0
+  - missing_count(email) = 0
+  - missing_percent(phone_clean) < 10%:
+      name: At most 10% missing phone numbers
+  
+  # Data quality - email standardization
+  - invalid_count(email) = 0:
+      valid format: email
+  
+  # State codes validation (if US-only)
+  - invalid_percent(state) < 5%:
+      valid regex: '^[A-Z]{2}$'
+      name: State codes should be 2-letter uppercase
+  
+  # Referential integrity with orders
+  - values in (customer_id) must exist in silver_orders (customer_id):
+      name: All customers in silver layer should have potential orders
+      severity: warn  # Warning only, new customers may not have orders yet
+
+checks for silver_orders:
+  # Row count
+  - row_count > 0
+  
+  # Uniqueness
+  - duplicate_count(order_id) = 0
+  
+  # Completeness
+  - missing_count(order_id) = 0
+  - missing_count(customer_id) = 0
+  - missing_count(order_date) = 0
+  
+  # Referential integrity
+  - values in (customer_id) must exist in silver_customers (customer_id):
+      name: All orders must reference valid customers
+  
+  # Business rules
+  - min(total_amount) >= 0:
+      name: Order amounts must be non-negative
+  
+  - max(total_amount) < 100000:
+      name: Flag unusually large orders
+      severity: warn
+  
+  # Status validation
+  - invalid_count(order_status) = 0:
+      valid values:
+        - PENDING
+        - PROCESSING
+        - SHIPPED
+        - DELIVERED
+        - CANCELLED
+  
+  # Date validation
+  - failed rows:
+      fail condition: order_date > current_date()
+      name: Order date cannot be in the future

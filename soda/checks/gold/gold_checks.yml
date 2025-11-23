@@ -1,0 +1,93 @@
+# Soda Checks for Gold Layer
+# Focus on business metrics and KPI validation
+
+checks for dim_customers:
+  # Row count
+  - row_count > 0:
+      name: Customer dimension should not be empty
+  
+  # Uniqueness
+  - duplicate_count(customer_id) = 0:
+      name: Customer dimension must have unique keys
+  
+  # Completeness of key fields
+  - missing_count(customer_id) = 0
+  - missing_count(email) = 0
+  
+  # Segmentation validation
+  - invalid_count(customer_segment) = 0:
+      valid values:
+        - VIP
+        - HIGH_VALUE
+        - MEDIUM_VALUE
+        - LOW_VALUE
+        - NEW
+      name: All customers must be assigned a valid segment
+  
+  # Business metrics
+  - min(lifetime_revenue) >= 0:
+      name: Lifetime revenue cannot be negative
+  
+  - avg(lifetime_orders) > 0:
+      name: Average lifetime orders should be positive
+      severity: warn
+  
+  # Distribution checks
+  - failed rows:
+      fail condition: lifetime_revenue > 0 AND lifetime_orders = 0
+      name: Customers with revenue must have at least 1 order
+  
+  - failed rows:
+      fail condition: customer_segment = 'VIP' AND lifetime_revenue < 1000
+      name: VIP customers must have at least $1000 lifetime revenue
+
+checks for fact_orders:
+  # Row count
+  - row_count > 0
+  
+  # Uniqueness
+  - duplicate_count(order_id) = 0
+  
+  # Completeness
+  - missing_count(order_id) = 0
+  - missing_count(customer_id) = 0
+  - missing_count(order_year) = 0
+  - missing_count(order_month) = 0
+  
+  # Business logic validation
+  - invalid_percent(order_month) = 0:
+      valid min: 1
+      valid max: 12
+  
+  - invalid_percent(order_quarter) = 0:
+      valid min: 1
+      valid max: 4
+  
+  # KPI checks
+  - avg(total_amount) > 10:
+      name: Average order value should be above $10
+      severity: warn
+  
+  - metric total_revenue:
+      sql: SELECT SUM(total_amount) FROM fact_orders
+      must be > 0
+  
+  - metric order_count_this_month:
+      sql: |
+        SELECT COUNT(*) 
+        FROM fact_orders 
+        WHERE order_year = DATE_PART('year', CURRENT_DATE)
+          AND order_month = DATE_PART('month', CURRENT_DATE)
+      must be > 0:
+        severity: warn
+        name: Should have orders in current month
+  
+  # Running total validation
+  - failed rows:
+      fail condition: customer_running_total < total_amount
+      name: Running total should be >= current order amount
+  
+  # Sequence validation
+  - failed rows:
+      fail condition: customer_order_sequence < 1
+      name: Order sequence must start from 1

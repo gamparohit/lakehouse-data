@@ -1,0 +1,81 @@
+# Bronze Layer - Source Definitions
+# Define raw data sources ingested by Airbyte
+
+version: 2
+
+sources:
+  - name: bronze
+    description: Raw data ingested from source systems via Airbyte
+    database: lakehouse
+    schema: bronze
+    
+    # Configure source freshness checks
+    freshness:
+      warn_after: {count: 24, period: hour}
+      error_after: {count: 48, period: hour}
+    
+    tables:
+      - name: customers
+        description: Raw customer data from source CRM
+        columns:
+          - name: customer_id
+            description: Primary key
+            tests:
+              - not_null
+          - name: created_at
+            description: Record creation timestamp
+          - name: updated_at
+            description: Record last update timestamp
+          
+          - name: email
+            description: Customer email address
+          - name: first_name
+          - name: last_name
+          - name: phone
+          - name: address
+          - name: city
+          - name: state
+          - name: zip_code
+          - name: country
+      
+      - name: orders
+        description: Raw order data from e-commerce platform
+        columns:
+          - name: order_id
+            description: Primary key
+            tests:
+              - not_null
+          - name: customer_id
+            description: Foreign key to customers
+          - name: order_date
+          - name: order_status
+          - name: total_amount
+          - name: created_at
+          - name: updated_at
+      
+      - name: order_items
+        description: Line items for each order
+        columns:
+          - name: order_item_id
+            tests:
+              - not_null
+          - name: order_id
+          - name: product_id
+          - name: quantity
+          - name: unit_price
+          - name: discount
+          - name: created_at
+      
+      - name: products
+        description: Product catalog
+        columns:
+          - name: product_id
+            tests:
+              - not_null
+          - name: product_name
+          - name: category
+          - name: unit_price
+          - name: cost
+          - name: is_active
+          - name: created_at
+          - name: updated_at

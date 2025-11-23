@@ -1,0 +1,67 @@
+# Soda Checks for Bronze Layer
+# Focus on schema validation and basic data integrity
+
+checks for customers:
+  # Schema validation
+  - schema:
+      fail:
+        when required column missing:
+          - customer_id
+          - email
+          - created_at
+          - updated_at
+  
+  # Row count monitoring
+  - row_count > 0:
+      name: Ensure customers table is not empty
+  
+  # Freshness check
+  - freshness(updated_at) < 1d:
+      name: Customer data updated within last 24 hours
+  
+  # Basic data quality
+  - missing_count(customer_id) = 0:
+      name: No missing customer IDs
+  
+  - missing_count(email) = 0:
+      name: No missing emails
+  
+  - duplicate_count(customer_id) = 0:
+      name: No duplicate customer IDs
+  
+  # Invalid values
+  - invalid_count(email) = 0:
+      valid format: email
+      name: All emails are valid format
+
+checks for orders:
+  # Schema validation
+  - schema:
+      fail:
+        when required column missing:
+          - order_id
+          - customer_id
+          - order_date
+          - total_amount
+  
+  # Row count
+  - row_count > 0
+  
+  # Freshness
+  - freshness(created_at) < 1d
+  
+  # Missing values
+  - missing_count(order_id) = 0
+  - missing_count(customer_id) = 0
+  - missing_count(order_date) = 0
+  
+  # Duplicates
+  - duplicate_count(order_id) = 0
+  
+  # Value ranges
+  - min(total_amount) >= 0:
+      name: Total amount should not be negative
+  
+  # Anomaly detection
+  - anomaly detection for row_count:
+      name: Detect unusual spikes or drops in order volume

@@ -1,0 +1,24 @@
+# Soda Core Configuration
+# Configure connection to DuckDB with S3/MinIO
+
+data_source lakehouse:
+  type: duckdb
+  connection:
+    database: ':memory:'
+    extensions:
+      - httpfs
+      - parquet
+    settings:
+      s3_endpoint: 'lakehouse-minio:9000'
+      s3_url_style: 'path'
+      s3_use_ssl: 'false'
+      s3_access_key_id: 'lakehouse'
+      s3_secret_access_key: 'lakehouse123'
+  
+  # Schema configuration for each layer
+  schema: bronze
+
+# Sampling configuration (for large datasets)
+sampler:
+  sample_limit: 1000000
+  sample_method: SYSTEM

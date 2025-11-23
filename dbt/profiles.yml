@@ -1,0 +1,47 @@
+# dbt Profile Configuration for DuckDB with MinIO/S3
+
+lakehouse:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: ':memory:'  # In-memory for development with S3 data
+      extensions:
+        - httpfs  # For S3/HTTP access
+        - parquet  # For Parquet files
+      settings:
+        s3_endpoint: 'lakehouse-minio:9000'
+        s3_url_style: 'path'
+        s3_use_ssl: false
+        s3_access_key_id: 'lakehouse'
+        s3_secret_access_key: 'lakehouse123'
+      threads: 4
+    
+    prod:
+      type: duckdb
+      path: 's3://gold/lakehouse_catalog.duckdb'  # Persistent catalog in S3
+      extensions:
+        - httpfs
+        - parquet
+      settings:
+        s3_endpoint: 'lakehouse-minio:9000'
+        s3_url_style: 'path'
+        s3_use_ssl: false
+        s3_access_key_id: 'lakehouse'
+        s3_secret_access_key: 'lakehouse123'
+      threads: 8
+    
+    local:
+      type: duckdb
+      path: './lakehouse_dev.duckdb'
+      extensions:
+        - httpfs
+        - parquet
+      settings:
+        # For local development pointing to remote MinIO
+        s3_endpoint: 'localhost:9000'
+        s3_url_style: 'path'
+        s3_use_ssl: false
+        s3_access_key_id: 'lakehouse'
+        s3_secret_access_key: 'lakehouse123'
+      threads: 4
