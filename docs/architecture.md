@@ -12,11 +12,11 @@ This lakehouse implements a modern data architecture based on the **Medallion Ar
 │  (Databases, APIs, Files, Streaming)                            │
 └────────────────────┬────────────────────────────────────────────┘
                      │
-                     │ CDC/Batch Ingestion
+                     │ Data Ingestion
                      ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                          Airbyte                                 │
-│              (Change Data Capture & Ingestion)                  │
+│                        Airflow                                   │
+│              (Data Ingestion & Orchestration)                   │
 └────────────────────┬────────────────────────────────────────────┘
                      │
                      ▼
@@ -65,7 +65,7 @@ This lakehouse implements a modern data architecture based on the **Medallion Ar
 
 ### Bronze Layer
 - **Purpose**: Single source of truth for raw data
-- **Operations**: Ingestion via Airbyte
+- **Operations**: Ingestion via Airflow or manual uploads
 - **Storage**: MinIO `bronze` bucket
 - **Format**: Parquet files
 - **Data Quality**: Schema validation, freshness checks
@@ -98,7 +98,7 @@ This lakehouse implements a modern data architecture based on the **Medallion Ar
 ## Data Flow
 
 1. **Ingestion** (Daily 2 AM)
-   - Airbyte syncs data from source systems
+   - Data ingestion from source systems
    - Data lands in Bronze layer as Parquet
    - Soda validates schema and freshness
 
@@ -137,7 +137,7 @@ This lakehouse implements a modern data architecture based on the **Medallion Ar
 | Component | Technology | Purpose |
 |-----------|-----------|---------|
 | Orchestration | Apache Airflow | Workflow scheduling and monitoring |
-| Ingestion | Airbyte | CDC and batch data ingestion |
+| Ingestion | Airflow / Manual | Data ingestion workflows |
 | Transformation | dbt | SQL-based transformations |
 | Compute | DuckDB | Analytical query engine |
 | Storage | MinIO | S3-compatible object storage |

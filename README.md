@@ -5,7 +5,6 @@ Data pipeline repository containing SQL transformations, data quality checks, an
 ## Overview
 
 This repository contains the "T" in ELT:
-- **Airbyte configurations**: Source/destination connections for CDC and data ingestion
 - **dbt models**: SQL transformations implementing medallion architecture (Bronze → Silver → Gold)
 - **Soda checks**: Data quality validation at each layer
 - **Airflow DAGs**: Orchestration workflows that tie everything together
@@ -13,7 +12,7 @@ This repository contains the "T" in ELT:
 ## Medallion Architecture
 
 ### Bronze Layer (Raw Data)
-- Raw, immutable data ingested from sources via Airbyte
+- Raw, immutable data ingested from source systems
 - Stored as Parquet files in MinIO `bronze` bucket
 - Minimal transformations, append-only
 - dbt sources defined here
@@ -37,9 +36,6 @@ This repository contains the "T" in ELT:
 ```
 lakehouse-data/
 ├── README.md
-├── airbyte/                      # Airbyte connection configs
-│   ├── connections/
-│   └── README.md
 ├── dbt/                          # dbt project
 │   ├── dbt_project.yml
 │   ├── profiles.yml
@@ -56,7 +52,6 @@ lakehouse-data/
 │       └── gold/
 ├── airflow/                     # Airflow DAGs
 │   └── dags/
-│       ├── ingestion_dag.py
 │       ├── transformation_dag.py
 │       └── utils/
 └── docs/                        # Documentation
@@ -120,7 +115,7 @@ Airflow is configured with git-sync to automatically pull DAGs from this reposit
 ```
 Source System
     ↓
-Airbyte (CDC/Ingestion)
+Data Ingestion (Airflow)
     ↓
 Bronze Layer (MinIO)
     ↓

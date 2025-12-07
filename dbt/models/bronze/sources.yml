@@ -1,19 +1,19 @@
 # Bronze Layer - Source Definitions
-# Define raw data sources ingested by Airbyte
+# Define raw data sources ingested from external systems
 
 version: 2
 
 sources:
   - name: bronze
-    description: Raw data ingested from source systems via Airbyte
+    description: Raw data ingested from source systems
     database: lakehouse
     schema: bronze
-    
+
     # Configure source freshness checks
     freshness:
-      warn_after: {count: 24, period: hour}
-      error_after: {count: 48, period: hour}
-    
+      warn_after: { count: 24, period: hour }
+      error_after: { count: 48, period: hour }
+
     tables:
       - name: customers
         description: Raw customer data from source CRM
@@ -26,7 +26,7 @@ sources:
             description: Record creation timestamp
           - name: updated_at
             description: Record last update timestamp
-          
+
           - name: email
             description: Customer email address
           - name: first_name
@@ -37,7 +37,7 @@ sources:
           - name: state
           - name: zip_code
           - name: country
-      
+
       - name: orders
         description: Raw order data from e-commerce platform
         columns:
@@ -52,7 +52,7 @@ sources:
           - name: total_amount
           - name: created_at
           - name: updated_at
-      
+
       - name: order_items
         description: Line items for each order
         columns:
@@ -65,7 +65,7 @@ sources:
           - name: unit_price
           - name: discount
           - name: created_at
-      
+
       - name: products
         description: Product catalog
         columns:

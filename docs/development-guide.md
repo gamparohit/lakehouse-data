@@ -196,11 +196,9 @@ WHERE lifetime_revenue < 0
 ### End-to-End Testing
 
 1. Deploy to local Kubernetes
-2. Configure sample Airbyte source
-3. Trigger ingestion DAG
-4. Verify data in Bronze layer
-5. Trigger transformation DAG
-6. Verify data in Silver and Gold layers
+2. Ingest sample data to Bronze layer
+3. Trigger transformation DAG
+4. Verify data in Silver and Gold layers
 
 ## Debugging
 
